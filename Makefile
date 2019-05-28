@@ -36,18 +36,28 @@ SLIC3R.DIR=$(BASE.DIR)/Slic3r
 SLIC3R.BUILD=$(BASE.DIR)/build.slic3r
 
 slic3r: slic3r.clean
-	mkdir -p $(SLIC3R.BUILD) && cd $(SLIC3R.build) && $(CMAKE.BIN) -DBOOST_LIBRARYDIR=$(INSTALLED.HOST.DIR)/lib -DBOOST_ROOT=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) -DCMAKE_INSTALL_PATH=$(INSTALLED.HOST.DIR) $(SLIC3R.DIR)/src && make -j$(J)
+	mkdir -p $(SLIC3R.BUILD) && cd $(SLIC3R.BUILD) && $(CMAKE.BIN) -DCMAKE_BUILD_TYPE=Debug -DEnable_GUI=ON -DBOOST_LIBRARYDIR=$(INSTALLED.HOST.DIR)/lib -DBOOST_ROOT=$(INSTALLED.HOST.DIR) -DCMAKE_PREFIX_PATH=$(INSTALLED.HOST.DIR) -DCMAKE_INSTALL_PREFIX=$(INSTALLED.HOST.DIR) $(SLIC3R.DIR)/src && make -j$(J)
 
 slic3r.clean: .FORCE
 	rm -rf $(SLIC3R.BUILD)
 
 run: .FORCE
 ifeq ($(OS), Darwin)
-	export DYLD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib  $(INSTALLED.HOST.DIR)/slic3r.app/Contents/MacOS/slic3r
+	export DYLD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib  && $(INSTALLED.HOST.DIR)/bin/slic3r
 endif
 ifeq ($(OS), Linux)
 	export LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib  $(INSTALLED.HOST.DIR)/bin/slic3r
 endif
+
+debug: .FORCE
+ifeq ($(OS), Darwin)
+	export DYLD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib  && lldb $(INSTALLED.HOST.DIR)/bin/slic3r
+endif
+ifeq ($(OS), Linux)
+	export LD_LIBRARY_PATH=$(INSTALLED.HOST.DIR)/lib  $(INSTALLED.HOST.DIR)/bin/slic3r
+endif
+
+
 
 wxwidgets: wxwidgets.clean
 ifeq ($(OS), Darwin)
